@@ -19,6 +19,19 @@ Three working pages plus category management and printable invoices:
 
 ## 1. Quick start
 
+### Visual Studio
+
+Open `CandyShop.sln`, then press **F5** (or Ctrl+F5 to run without the debugger). Two run
+profiles are defined in `Properties/launchSettings.json`: `http` (listed first, so it is the
+default) and `https`. Pick `https` from the run-target dropdown for TLS — that profile needs
+the ASP.NET Core dev certificate, which you trust once with:
+
+```bash
+dotnet dev-certs https --trust
+```
+
+### Command line
+
 ```bash
 dotnet restore
 ```
@@ -65,6 +78,8 @@ Plain ASP.NET Core MVC — no extra layers, no repositories, no API project, no 
 packages beyond EF Core itself.
 
 ```
+CandyShop.sln                  Solution file (single project) - open this in Visual Studio
+CandyShop.csproj               The project itself
 Program.cs                     Startup: DI, cookie auth, rate limiter, routing, auto-migrate
 /Controllers
     AccountController.cs       Login / Logout / AccessDenied
