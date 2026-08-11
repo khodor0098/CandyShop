@@ -1,0 +1,70 @@
+@model ProductFormViewModel
+@{
+    ViewData["Title"] = Model.IsEdit ? "Edit Product" : "Add Product";
+    ViewData["ActivePage"] = "Products";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header fw-semibold">@ViewData["Title"]</div>
+            <div class="card-body">
+                <form asp-action="@(Model.IsEdit ? "Edit" : "Create")" asp-route-id="@(Model.IsEdit ? Model.Id : null)" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" class="form-control form-control-lg" autofocus placeholder="e.g. Gummy Bears" />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="CategoryId" class="form-label"></label>
+                        <select asp-for="CategoryId" asp-items="Model.CategoryOptions" class="form-select form-select-lg">
+                            <option value="">-- Select a category --</option>
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                        <div class="form-text">
+                            Every product belongs to one category.
+                            <a asp-controller="Categories" asp-action="Index">Manage categories</a>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Price" class="form-label"></label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input asp-for="Price" class="form-control form-control-lg" type="number" step="0.01" min="0.01" placeholder="0.00" />
+                        </div>
+                        <span asp-validation-for="Price" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-check form-switch mb-4">
+                        <input asp-for="IsActive" class="form-check-input" role="switch" />
+                        <label asp-for="IsActive" class="form-check-label"></label>
+                        <div class="form-text">Only active products can be sold on the Sales page.</div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
+                            @(Model.IsEdit ? "Save Changes" : "Add Product")
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-lg">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        @if (Model.IsEdit)
+        {
+            <p class="text-muted small mt-2">
+                Changing the name or price only affects future sales. Completed sales keep the name and
+                price recorded at the time of purchase.
+            </p>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

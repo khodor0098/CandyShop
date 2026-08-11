@@ -1,0 +1,205 @@
+html {
+    font-size: 15px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+body {
+    background-color: #f6f7f9;
+}
+
+/* Product buttons: large tap targets for use on a tablet or phone in the van. */
+.add-product {
+    min-height: 4.75rem;
+    line-height: 1.2;
+    white-space: normal;
+}
+
+.add-product:active {
+    transform: scale(0.97);
+}
+
+/* Keep the running total and Complete Sale button in view while scrolling products. */
+@media (min-width: 992px) {
+    .cart-card {
+        position: sticky;
+        top: 1rem;
+    }
+}
+
+.table > :not(caption) > * > * {
+    padding: 0.5rem 0.6rem;
+}
+
+.qty-input {
+    /* Hide the spinner arrows: the +/- buttons are the primary control. */
+    appearance: textfield;
+}
+
+.category-heading {
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6c757d;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 0.2rem;
+    margin-bottom: 0.5rem;
+}
+
+footer {
+    font-size: 0.8rem;
+}
+
+/* ---------------------------------------------------------------------------
+   Invoice / receipt
+   A single narrow monospaced layout: it fills the paper on an 80 mm thermal
+   roll and prints as a receipt-shaped column on A4.
+   --------------------------------------------------------------------------- */
+.invoice {
+    max-width: 80mm;
+    margin: 0 auto;
+    background: #fff;
+}
+
+.invoice-body {
+    font-family: "Consolas", "DejaVu Sans Mono", "Courier New", monospace;
+    font-size: 0.8rem;
+    line-height: 1.35;
+}
+
+.invoice-header {
+    text-align: center;
+}
+
+.invoice-store {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.invoice-subtitle {
+    font-size: 0.75rem;
+}
+
+.invoice-rule {
+    border-top: 1px dashed #000;
+    margin: 0.5rem 0;
+}
+
+.invoice-meta span {
+    display: inline-block;
+    min-width: 4.5rem;
+}
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.invoice-table th,
+.invoice-table td {
+    padding: 0.1rem 0;
+    vertical-align: top;
+}
+
+.invoice-table th {
+    font-weight: 600;
+    border-bottom: 1px solid #000;
+}
+
+.invoice-category {
+    display: block;
+    font-size: 0.65rem;
+    color: #6c757d;
+}
+
+.invoice-total {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.invoice-items {
+    font-size: 0.7rem;
+    color: #6c757d;
+}
+
+.invoice-footer {
+    text-align: center;
+    font-weight: 600;
+}
+
+.text-start { text-align: left; }
+.text-end { text-align: right; }
+
+/* ---------------------------------------------------------------------------
+   Print: only the invoice is printed - no navigation, buttons, alerts or footer.
+   --------------------------------------------------------------------------- */
+@media print {
+    @page {
+        /* "auto" keeps 80 mm receipt rolls at their native width. */
+        size: auto;
+        margin: 6mm;
+    }
+
+    html,
+    body {
+        background: #fff !important;
+        font-size: 12px;
+    }
+
+    /* Hide the whole chrome of the application. The body prefix keeps these selectors more
+       specific than Bootstrap's own !important display utilities (.d-flex, .d-inline, ...),
+       which would otherwise win on elements that carry both. */
+    body header,
+    body nav,
+    body footer,
+    body .alert,
+    body .btn,
+    body button,
+    body form,
+    body .no-print {
+        display: none !important;
+    }
+
+    /* Reset the layout containers so the receipt starts at the top-left corner. */
+    main,
+    main .container-fluid,
+    main .row,
+    main [class*="col-"] {
+        display: block !important;
+        width: auto !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        float: none !important;
+    }
+
+    .invoice {
+        max-width: 76mm;
+        margin: 0 auto !important;
+        border: 0 !important;
+        box-shadow: none !important;
+    }
+
+    .invoice-body {
+        padding: 0 !important;
+        color: #000;
+    }
+
+    .invoice-category,
+    .invoice-items {
+        color: #000 !important;
+    }
+
+    /* Never break a line item across pages. */
+    .invoice-table tr {
+        page-break-inside: avoid;
+    }
+}

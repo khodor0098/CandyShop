@@ -1,0 +1,69 @@
+@{
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Candy Van</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark shadow-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold" asp-controller="Sales" asp-action="Index">🍬 Candy Van</a>
+                @if (isAuthenticated)
+                {
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                            aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="mainNav">
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewData["ActivePage"] as string == "Sales" ? "active fw-semibold" : "")"
+                                   asp-controller="Sales" asp-action="Index">Sales</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewData["ActivePage"] as string == "Products" ? "active fw-semibold" : "")"
+                                   asp-controller="Products" asp-action="Index">Products</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewData["ActivePage"] as string == "Categories" ? "active fw-semibold" : "")"
+                                   asp-controller="Categories" asp-action="Index">Categories</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewData["ActivePage"] as string == "Reports" ? "active fw-semibold" : "")"
+                                   asp-controller="Reports" asp-action="Index">Reports</a>
+                            </li>
+                        </ul>
+                        @* no-print keeps this out of printed invoices even though .d-flex would
+                           otherwise out-specify the bare form selector in the print rules. *@
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-flex align-items-center gap-2 no-print">
+                            <span class="navbar-text small d-none d-sm-inline">@User.Identity!.Name</span>
+                            <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </nav>
+    </header>
+
+    <main class="container-fluid flex-grow-1 py-3 px-3 px-md-4">
+        <partial name="_Alerts" />
+        @RenderBody()
+    </main>
+
+    <footer class="border-top text-muted small py-2 px-3 px-md-4 bg-body-tertiary">
+        Candy Van Management &mdash; @DateTime.Now.ToString("yyyy-MM-dd HH:mm")
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

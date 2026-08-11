@@ -1,0 +1,185 @@
+@model ReportsViewModel
+@{
+    ViewData["Title"] = "Reports";
+    ViewData["ActivePage"] = "Reports";
+    var isToday = Model.Filter.DateFrom?.Date == DateTime.Today && Model.Filter.DateTo?.Date == DateTime.Today;
+}
+
+<h1 class="h4 mb-3">Reports</h1>
+
+<!-- Summary -->
+<div class="row row-cols-1 row-cols-sm-3 g-2 mb-3">
+    <div class="col">
+        <div class="card shadow-sm h-100">
+            <div class="card-body py-3">
+                <div class="text-muted small">@(isToday ? "Today's Sales" : "Sales Total")</div>
+                <div class="h3 mb-0 fw-bold">@Model.TotalRevenue.ToString("C")</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card shadow-sm h-100">
+            <div class="card-body py-3">
+                <div class="text-muted small">Number of Sales</div>
+                <div class="h3 mb-0 fw-bold">@Model.SaleCount</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card shadow-sm h-100">
+            <div class="card-body py-3">
+                <div class="text-muted small">Items Sold</div>
+                <div class="h3 mb-0 fw-bold">@Model.ItemsSold</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p class="text-muted small">
+    Range: <strong>@Model.RangeDescription</strong>
+    @if (Model.IsProductFiltered)
+    {
+        <text>&mdash; totals cover the matching @(Model.Filter.ProductId.HasValue ? "product" : "category") lines only.</text>
+    }
+</p>
+
+<!-- Filters -->
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-2 align-items-end">
+            <input type="hidden" asp-for="Filter.Applied" value="true" />
+
+            <div class="col-6 col-md-3">
+                <label asp-for="Filter.DateFrom" class="form-label small mb-1"></label>
+                <input asp-for="Filter.DateFrom" type="date" class="form-control" />
+            </div>
+            <div class="col-6 col-md-3">
+                <label asp-for="Filter.DateTo" class="form-label small mb-1"></label>
+                <input asp-for="Filter.DateTo" type="date" class="form-control" />
+            </div>
+            <div class="col-6 col-md-2">
+                <label asp-for="Filter.CategoryId" class="form-label small mb-1"></label>
+                <select asp-for="Filter.CategoryId" asp-items="Model.CategoryOptions" class="form-select" id="category-select">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label asp-for="Filter.ProductId" class="form-label small mb-1"></label>
+                @* Rendered by hand so each option can carry its category for the dependent dropdown. *@
+                <select name="Filter.ProductId" class="form-select" id="product-select">
+                    <option value="">All Products</option>
+                    @foreach (var product in Model.ProductOptions)
+                    {
+                        <option value="@product.Id" data-category="@product.CategoryId"
+                                selected="@(Model.Filter.ProductId == product.Id)">
+                            @(product.IsActive ? product.Name : $"{product.Name} (inactive)")
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-4 col-md-1">
+                <label asp-for="Filter.SaleId" class="form-label small mb-1"></label>
+                <input asp-for="Filter.SaleId" type="number" min="1" class="form-control" placeholder="#" />
+            </div>
+            <div class="col-8 col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">Apply Filters</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+            </div>
+
+            <div class="col-12">
+                <span asp-validation-for="Filter.DateFrom" class="text-danger small d-block"></span>
+                <span asp-validation-for="Filter.SaleId" class="text-danger small d-block"></span>
+                <span asp-validation-for="Filter.CategoryId" class="text-danger small d-block"></span>
+                <span asp-validation-for="Filter.ProductId" class="text-danger small d-block"></span>
+            </div>
+        </form>
+        <div class="form-text mt-2">Clear both dates and press Apply to report on all time.</div>
+    </div>
+</div>
+
+@if (ViewData["Truncated"] is int cap)
+{
+    <div class="alert alert-warning">
+        Only the most recent @cap sales are shown. Narrow the date range to see older sales.
+    </div>
+}
+
+<!-- Results -->
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover table-striped align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Sale ID</th>
+                    <th scope="col">Categories</th>
+                    <th scope="col" class="text-end">Items</th>
+                    <th scope="col" class="text-end">Total</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Sales.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">No sales match the current filters.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var sale in Model.Sales)
+                    {
+                        <tr class="sale-row" data-href="@Url.Action("Sale", new { id = sale.SaleId })" style="cursor: pointer">
+                            <td class="text-nowrap">@sale.SaleDateLocal.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>#@sale.SaleId</td>
+                            <td class="small text-muted">@sale.Categories</td>
+                            <td class="text-end">@sale.ItemCount</td>
+                            <td class="text-end fw-semibold">@sale.Total.ToString("C")</td>
+                            <td class="text-end">
+                                <a asp-action="Sale" asp-route-id="@sale.SaleId" class="btn btn-sm btn-outline-primary">Details</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Whole row is clickable for quicker use on a tablet.
+        document.querySelectorAll('.sale-row').forEach(function (row) {
+            row.addEventListener('click', function (event) {
+                if (!event.target.closest('a')) {
+                    window.location.href = row.dataset.href;
+                }
+            });
+        });
+
+        // Choosing a category narrows the product dropdown to that category.
+        (function () {
+            var categorySelect = document.getElementById('category-select');
+            var productSelect = document.getElementById('product-select');
+
+            function syncProducts() {
+                var category = categorySelect.value;
+                Array.prototype.forEach.call(productSelect.options, function (option) {
+                    if (!option.value) {
+                        return; // keep "All Products"
+                    }
+                    var match = !category || option.dataset.category === category;
+                    option.hidden = !match;
+                    option.disabled = !match;
+                    if (!match && option.selected) {
+                        productSelect.value = '';
+                    }
+                });
+            }
+
+            categorySelect.addEventListener('change', syncProducts);
+            syncProducts();
+        })();
+    </script>
+}

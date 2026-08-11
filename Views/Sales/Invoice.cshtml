@@ -1,0 +1,97 @@
+@model InvoiceViewModel
+@{
+    ViewData["Title"] = $"Invoice #{Model.SaleId}";
+    ViewData["ActivePage"] = "Sales";
+}
+
+@* Everything outside .invoice is hidden when printing (see the print rules in site.css). *@
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+
+        <div class="d-flex flex-wrap gap-2 mb-3 no-print">
+            <button type="button" class="btn btn-primary btn-lg flex-grow-1" id="print-invoice">🖨 Print Invoice</button>
+            <a asp-action="Index" class="btn btn-success btn-lg flex-grow-1">New Sale</a>
+            <a asp-controller="Reports" asp-action="Sale" asp-route-id="@Model.SaleId" class="btn btn-outline-secondary btn-lg">Sale Details</a>
+        </div>
+
+        <div class="invoice card shadow-sm">
+            <div class="invoice-body card-body">
+                <div class="invoice-header">
+                    <div class="invoice-store">@Model.StoreName</div>
+                    @if (!string.IsNullOrWhiteSpace(Model.StoreSubtitle))
+                    {
+                        <div class="invoice-subtitle">@Model.StoreSubtitle</div>
+                    }
+                </div>
+
+                <div class="invoice-rule"></div>
+
+                <div class="invoice-meta">
+                    <div><span>Invoice #:</span> <strong>@Model.SaleId</strong></div>
+                    <div><span>Date:</span> @Model.SaleDateLocal.ToString("yyyy-MM-dd HH:mm")</div>
+                </div>
+
+                <div class="invoice-rule"></div>
+
+                <table class="invoice-table">
+                    <thead>
+                        <tr>
+                            <th class="text-start">Product</th>
+                            <th class="text-end">Qty</th>
+                            <th class="text-end">Price</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var line in Model.Lines)
+                        {
+                            <tr>
+                                <td class="text-start">
+                                    @line.ProductName
+                                    @if (!string.IsNullOrWhiteSpace(line.CategoryName))
+                                    {
+                                        <span class="invoice-category">@line.CategoryName</span>
+                                    }
+                                </td>
+                                <td class="text-end">@line.Quantity</td>
+                                <td class="text-end">@line.UnitPrice.ToString("C")</td>
+                                <td class="text-end">@line.Total.ToString("C")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <div class="invoice-rule"></div>
+
+                <div class="invoice-total">
+                    <span>TOTAL:</span>
+                    <span>@Model.Total.ToString("C")</span>
+                </div>
+                <div class="invoice-items">Items: @Model.ItemCount</div>
+
+                <div class="invoice-rule"></div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.FooterMessage))
+                {
+                    <div class="invoice-footer">@Model.FooterMessage</div>
+                }
+            </div>
+        </div>
+
+        <p class="text-muted small mt-2 no-print">
+            This invoice was generated from saved sale #@Model.SaleId. Prices are the prices recorded
+            at the time of the sale. Printing shows the receipt only &mdash; navigation and buttons are
+            excluded.
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Uses the browser's native print dialog; the @@media print rules in site.css
+        // reduce the page to the receipt.
+        document.getElementById('print-invoice').addEventListener('click', function () {
+            window.print();
+        });
+    </script>
+}

@@ -1,0 +1,18 @@
+## Build output
+bin/
+obj/
+*.user
+
+## SQLite database (runtime data - recreated by migrations on startup)
+*.db
+*.db-shm
+*.db-wal
+
+## IDE
+.vs/
+.vscode/
+.idea/
+
+## Local secrets - never commit real credentials
+appsettings.Production.json
+appsettings.Local.json

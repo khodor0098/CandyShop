@@ -1,0 +1,81 @@
+@model IReadOnlyList<ProductListItemViewModel>
+@{
+    ViewData["Title"] = "Products";
+    ViewData["ActivePage"] = "Products";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h4 mb-0">Products</h1>
+    <div class="d-flex gap-2">
+        <a asp-controller="Categories" asp-action="Index" class="btn btn-outline-secondary">Manage Categories</a>
+        <a asp-action="Create" class="btn btn-primary">+ Add Product</a>
+    </div>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-info">No products yet. Use <strong>Add Product</strong> to create your first one.</div>
+}
+else
+{
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Product Name</th>
+                        <th scope="col">Category</th>
+                        <th scope="col" class="text-end">Price</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Created</th>
+                        <th scope="col" class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in Model)
+                    {
+                        <tr class="@(product.IsSellable ? "" : "text-muted")">
+                            <td>@product.Name</td>
+                            <td>
+                                @product.CategoryName
+                                @if (!product.CategoryIsActive)
+                                {
+                                    <span class="badge text-bg-warning">category inactive</span>
+                                }
+                            </td>
+                            <td class="text-end">@product.Price.ToString("C")</td>
+                            <td>
+                                @if (product.IsActive)
+                                {
+                                    <span class="badge text-bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge text-bg-secondary">Inactive</span>
+                                }
+                            </td>
+                            <td class="small">@product.CreatedAtLocal.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td class="text-end text-nowrap">
+                                <a asp-action="Edit" asp-route-id="@product.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <form asp-action="ToggleActive" asp-route-id="@product.Id" method="post" class="d-inline">
+                                    <button type="submit"
+                                            class="btn btn-sm @(product.IsActive ? "btn-outline-secondary" : "btn-outline-success")"
+                                            data-confirm="@(product.IsActive
+                                                ? $"Deactivate \"{product.Name}\"? It will no longer appear on the Sales page."
+                                                : $"Activate \"{product.Name}\"? It will appear on the Sales page.")">
+                                        @(product.IsActive ? "Deactivate" : "Activate")
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <p class="text-muted small mt-2 mb-0">
+        Products are never deleted &mdash; deactivate them instead so past sales keep their history.
+        A product only appears on the Sales page when both the product and its category are active.
+    </p>
+}

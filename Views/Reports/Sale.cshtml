@@ -1,0 +1,59 @@
+@model SaleDetailsViewModel
+@{
+    ViewData["Title"] = $"Sale #{Model.SaleId}";
+    ViewData["ActivePage"] = "Reports";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div>
+                <h1 class="h4 mb-0">Sale #@Model.SaleId</h1>
+                <div class="text-muted small">Date: @Model.SaleDateLocal.ToString("yyyy-MM-dd HH:mm")</div>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-controller="Sales" asp-action="Invoice" asp-route-id="@Model.SaleId" class="btn btn-outline-primary">🖨 Invoice</a>
+                <a asp-action="Index" class="btn btn-outline-secondary">&larr; Back to Reports</a>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Product</th>
+                            <th scope="col">Category</th>
+                            <th scope="col" class="text-end">Price</th>
+                            <th scope="col" class="text-end">Quantity</th>
+                            <th scope="col" class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var line in Model.Lines)
+                        {
+                            <tr>
+                                <td>@line.ProductName</td>
+                                <td class="text-muted small">@line.CategoryName</td>
+                                <td class="text-end">@line.UnitPrice.ToString("C")</td>
+                                <td class="text-end">@line.Quantity</td>
+                                <td class="text-end">@line.Total.ToString("C")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <th scope="row" colspan="3">Total</th>
+                            <th class="text-end">@Model.ItemCount</th>
+                            <th class="text-end h5 mb-0">@Model.Total.ToString("C")</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <p class="text-muted small mt-2">
+            Prices shown are the prices recorded at the time of this sale and never change.
+        </p>
+    </div>
+</div>

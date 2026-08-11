@@ -1,0 +1,115 @@
+@model SaleViewModel
+@{
+    ViewData["Title"] = "New Sale";
+    ViewData["ActivePage"] = "Sales";
+}
+
+<div class="row g-3">
+    <!-- Product picker -->
+    <div class="col-12 col-lg-7 col-xl-8">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+            <h1 class="h4 mb-0">New Sale</h1>
+            @if (Model.ProductCount > 0)
+            {
+                <input type="search" id="product-search" class="form-control form-control-sm w-auto flex-grow-1"
+                       style="max-width: 18rem" placeholder="Search products&hellip;" autocomplete="off" />
+            }
+        </div>
+
+        @if (Model.ProductCount == 0)
+        {
+            <div class="alert alert-warning">
+                There are no sellable products yet. A product only appears here when both the product
+                and its category are active.
+                <a asp-controller="Products" asp-action="Create" class="alert-link">Add a product</a> or
+                <a asp-controller="Categories" asp-action="Index" class="alert-link">check your categories</a>.
+            </div>
+        }
+        else
+        {
+            <!-- Category filter: quick one-tap narrowing, purely client-side. -->
+            <div class="d-flex flex-wrap gap-1 mb-3" id="category-filter" role="group" aria-label="Filter by category">
+                <button type="button" class="btn btn-sm btn-primary category-pill" data-category="all">All</button>
+                @foreach (var group in Model.Groups)
+                {
+                    <button type="button" class="btn btn-sm btn-outline-primary category-pill"
+                            data-category="@group.CategoryId">
+                        @group.CategoryName <span class="badge text-bg-light">@group.Products.Count</span>
+                    </button>
+                }
+            </div>
+
+            @foreach (var group in Model.Groups)
+            {
+                <section class="category-group mb-3" data-category="@group.CategoryId">
+                    <h2 class="category-heading">@group.CategoryName</h2>
+                    <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-2">
+                        @foreach (var product in group.Products)
+                        {
+                            <div class="col product-cell" data-name="@product.Name.ToLowerInvariant()">
+                                <button type="button"
+                                        class="btn btn-outline-primary w-100 h-100 py-3 add-product"
+                                        data-id="@product.Id"
+                                        data-name="@product.Name"
+                                        data-price="@product.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                                    <span class="d-block fw-semibold text-truncate">@product.Name</span>
+                                    <span class="d-block small">@product.Price.ToString("C")</span>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+            <p class="text-muted small mt-2 mb-0 d-none" id="no-match">No product matches your search.</p>
+        }
+    </div>
+
+    <!-- Cart -->
+    <div class="col-12 col-lg-5 col-xl-4">
+        <div class="card shadow-sm cart-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="fw-semibold">Current Sale</span>
+                <button type="button" id="clear-cart" class="btn btn-sm btn-outline-secondary d-none">Clear</button>
+            </div>
+
+            <div class="card-body p-0">
+                <p class="text-muted text-center my-4 mb-4" id="cart-empty">
+                    Tap a product to add it to the sale.
+                </p>
+                <div class="table-responsive d-none" id="cart-wrapper">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">Product</th>
+                                <th scope="col" class="text-end">Price</th>
+                                <th scope="col" class="text-center" style="min-width: 7.5rem">Qty</th>
+                                <th scope="col" class="text-end">Total</th>
+                                <th scope="col"><span class="visually-hidden">Remove</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="cart-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <div class="d-flex justify-content-between align-items-baseline mb-3">
+                    <span class="h5 mb-0">Total:</span>
+                    <span class="h4 mb-0 fw-bold" id="cart-total">$0.00</span>
+                </div>
+
+                <form asp-action="Complete" method="post" id="complete-sale-form">
+                    <div id="cart-inputs"></div>
+                    <button type="submit" class="btn btn-success btn-lg w-100" id="complete-sale" disabled>
+                        Complete Sale
+                    </button>
+                </form>
+                <div class="form-text mt-2">An invoice is generated once the sale is saved.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/sales.js" asp-append-version="true"></script>
+}

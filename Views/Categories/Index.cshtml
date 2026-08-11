@@ -1,0 +1,78 @@
+@model IReadOnlyList<CategoryListItemViewModel>
+@{
+    ViewData["Title"] = "Categories";
+    ViewData["ActivePage"] = "Categories";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h4 mb-0">Categories</h1>
+    <a asp-action="Create" class="btn btn-primary">+ Add Category</a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-info">
+        No categories yet. Every product must belong to a category, so create one first.
+    </div>
+}
+else
+{
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Category Name</th>
+                        <th scope="col" class="text-end">Products</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Created</th>
+                        <th scope="col" class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var category in Model)
+                    {
+                        <tr class="@(category.IsActive ? "" : "text-muted")">
+                            <td>@category.Name</td>
+                            <td class="text-end">
+                                @category.ProductCount
+                                @if (category.ProductCount != category.ActiveProductCount)
+                                {
+                                    <span class="text-muted small">(@category.ActiveProductCount active)</span>
+                                }
+                            </td>
+                            <td>
+                                @if (category.IsActive)
+                                {
+                                    <span class="badge text-bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge text-bg-secondary">Inactive</span>
+                                }
+                            </td>
+                            <td class="small">@category.CreatedAtLocal.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td class="text-end text-nowrap">
+                                <a asp-action="Edit" asp-route-id="@category.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <form asp-action="ToggleActive" asp-route-id="@category.Id" method="post" class="d-inline">
+                                    <button type="submit"
+                                            class="btn btn-sm @(category.IsActive ? "btn-outline-secondary" : "btn-outline-success")"
+                                            data-confirm="@(category.IsActive
+                                                ? $"Deactivate \"{category.Name}\"? Its {category.ActiveProductCount} active product(s) will be hidden from the Sales page."
+                                                : $"Activate \"{category.Name}\"? Its active products will appear on the Sales page.")">
+                                        @(category.IsActive ? "Deactivate" : "Activate")
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <p class="text-muted small mt-2 mb-0">
+        Categories are never deleted &mdash; deactivate them instead. Deactivating a category also
+        hides its products from the Sales page, but keeps all sales history intact.
+    </p>
+}
